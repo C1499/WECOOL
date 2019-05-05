@@ -1,0 +1,189 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="author" content="WECOOL">
+<title>WECOOL翻牌</title>
+<link href="css.css" rel="stylesheet" type="text/css" /></head>
+
+<body 	background="images/background.png">
+    <div id="big" >
+        <img src="images/电视机.png" width="990" height="723"/>
+        <div id="images">
+        </div>
+        <div id="clicks">
+            <img src="images/clicks.png" width="180" height="140"/>
+            <span id="count"></span>
+        </div>
+        <img src="images/again.png" id="restart">
+    </div>
+    <script type="text/javascript">
+        /**
+         * [iimg 图片数组]
+         * @type {Array}
+         */
+        var iimg = [
+            [1,1,1,1],
+            [2,2,2,2],
+            [3,3,3,3],
+            [4,4,4,4]
+        ];
+        /**
+         * [map1 数]
+         * @type {Array}
+         */
+        var map1 = new Array(1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8);
+        /**
+         * [map2 存放随机数]
+         * @type {Array}
+         */
+        var map2 = [
+            [1,3,5,4],
+            [2,7,5,1],
+            [7,2,4,3],
+            [6,8,6,8]
+        ];
+        /**
+         * [row 行数]
+         * @type {Number}
+         */
+        var row = 4;
+        var mDiv = document.getElementById('images');         //游戏区域
+        var restart = document.getElementById('restart');
+        var one = null;
+        var two = null;
+        var bianone;
+        var biantwo;
+        var sum=0;
+        var count=0;
+        /**
+         * [counta 计数功能]
+         * @return {[type]} [description]
+         */
+        function counta(){
+            var couSpan = document.getElementById('count');
+            if(count<10){
+                couSpan.style.left=72+"px";
+            }
+            else{
+                couSpan.style.left=51+"px";
+            }
+            couSpan.textContent=count;
+        }
+        /**
+         * [init 初始化牌]
+         * @return {[type]} [description]
+         */
+        function init(){
+            for(var i=0;i<row;i++) {
+                for(var j=0;j<row;j++){
+                    iimg[i][j]=document.createElement("img");           //图
+                    iimg[i][j].style.top=i*52+"px";
+                    iimg[i][j].style.left=j*52+"px";
+                    // iimg[i][j].src='images/image'+map2[i][j]+'.png';       //添加图片地址
+                    iimg[i][j].src='images/image0.png';
+                    iimg[i][j].i = i;
+                    iimg[i][j].j = j;
+                    iimg[i][j].on = true;
+                    mDiv.appendChild(iimg[i][j]);           //添加牌
+                }
+                    // document.write(iimg[i][j]);
+                    // document.write("<br>");
+            }
+        };
+        function map(map1,map2){
+            for(var i=0;i<row;i++) {
+                for(var j=0;j<row;j++){
+                    console.log(map1.length);
+                    var end = Math.floor(Math.random()*map1.length);        //random函数随机得到一个0-（map1长度）之间的数
+                    map2[i][j]=map1[end];               //得到map1中以end为下标的数
+                    map1.splice(end,1);                 //删除用过的数
+                }
+            }
+        }
+        function start(){           //开始游戏
+            map(map1,map2);
+            init();
+            counta();
+            for(var i=0;i<row;i++) {
+                for(var j=0;j<row;j++){
+                    iimg[i][j].onclick=function(){
+                        if(this.on == false){
+                            return false;
+                        }
+                        count++;
+                        counta();
+                        this.src='images/image'+map2[this.i][this.j]+'.png';
+                        if(one == null){
+                            // one = map2[this.i][this.j];
+                            one = this;                 //把当前翻过的赋给one
+                        }
+                        else{
+                            if(one === this){               //如果点击了两次同一张牌
+                                this.src = 'images/image0.png';            //翻回去
+                                one = null;
+                            }
+                            else if(map2[one.i][one.j] !== map2[this.i][this.j]){        //如果第一张牌不等于第二张牌
+                                two = this;                                 //把第二张牌赋给two
+                                // setTimeout(function(){two.src = 'images/image0.png';},500);           //延迟0.3秒翻回去
+                                // setTimeout('bian()',1000);
+                                bian();
+                            }
+                            else{
+                                iimg[this.i][this.j].on = false;
+                                one.on = false;
+                                one = null;                 //one还原
+                                sum++;
+                                off();                      //调用完成函数
+                            }
+                        }
+                    }
+                }
+            }
+            restart.onclick=rstart;
+        }
+        function bian(){
+            bianone = one;
+            biantwo = two;
+            two=null;
+            one = null;
+            setTimeout('bianone.src=\'images/image0.png\';biantwo.src=\'images/image0.png\';',200);
+        }
+    
+        function off(){
+            if(sum == iimg.length*2){
+            //    setTimeout('alert("恭喜你完成了!你的成绩为"+count+"次。")',200);
+                setTimeout('var play=confirm("恭喜你通关了！你的成绩为"+count+"次。是否进入下一关？");if(play){rstart();}',200);
+            }
+        };
+        /**
+         * [rstart 重新开始游戏]
+         * @return {[type]} [description]
+         */
+        function rstart(){
+                map1 = new Array(1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8);
+                count = 0;
+                reInit();
+                start();
+        }
+        /**
+         * [reInit 删除游戏区域所有div]
+         * @return {[type]} [description]
+         */
+        function reInit(){
+            for(var i=0;i<row;i++) {
+                for(var j=0;j<row;j++){
+                    mDiv.removeChild(iimg[i][j]);
+                }
+            }
+        }
+    window.onload = function(){
+        counta();
+        start();
+        rstart();
+    };
+    
+    
+    </script>
+</body>
+</html>
